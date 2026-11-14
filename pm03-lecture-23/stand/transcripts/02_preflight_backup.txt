@@ -1,0 +1,23 @@
+cloudadmin@cloud-vm:~$ python3 --version; pg_isready -h 127.0.0.1 -p 5432
+Python 3.13.18
+127.0.0.1:5432 - accepting connections
+
+cloudadmin@cloud-vm:~$ df -h /opt | tail -1
+/dev/vda        252G  8.6G   30G  23% /
+
+cloudadmin@cloud-vm:~$ ls -l /etc/cloud-app/cloud-app.env
+-rw-r----- 1 root cloudapp 142 Nov 14 15:24 /etc/cloud-app/cloud-app.env
+
+cloudadmin@cloud-vm:~$ sed -E 's#(://[^:]+:)[^@]+@#\1***@#; s#(AUTH_SECRET=).*#\1***#' /etc/cloud-app/cloud-app.env
+APP_ENV=production
+DATABASE_URL=postgresql+psycopg2://cloud_app_user:***@127.0.0.1:5432/cloud_app
+AUTH_SECRET=***
+
+cloudadmin@cloud-vm:~$ pg_dump -h 127.0.0.1 -U cloud_app_user -Fc cloud_app > /var/backups/cloud_app_pre_v1.4.0.dump && ls -lh /var/backups/cloud_app_pre_v1.4.0.dump
+-rw-r--r-- 1 root root 6.9K Nov 14 15:24 /var/backups/cloud_app_pre_v1.4.0.dump
+
+cloudadmin@cloud-vm:~$ cp -p /etc/cloud-app/cloud-app.env /var/backups/cloud-app.env.v1.3.2 && ls -l /var/backups/
+total 12
+-rw-r----- 1 root cloudapp  142 Nov 14 15:24 cloud-app.env.v1.3.2
+-rw-r--r-- 1 root root     6994 Nov 14 15:24 cloud_app_pre_v1.4.0.dump
+

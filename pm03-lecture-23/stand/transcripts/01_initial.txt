@@ -1,0 +1,18 @@
+cloudadmin@cloud-vm:~$ date '+%Y-%m-%d %H:%M'; cd /opt/cloud-app && readlink current
+2026-11-14 15:24
+/opt/cloud-app/releases/v1.3.2
+
+cloudadmin@cloud-vm:~$ cloud-appctl status
+cloud-app.service - Cloud Application
+   Active: active (running), PID 963, user cloudapp
+   Release: /opt/cloud-app/releases/v1.3.2
+
+cloudadmin@cloud-vm:~$ curl -s http://127.0.0.1:8000/health; echo; curl -s http://127.0.0.1:8000/version
+{"status":"ok"}
+{"version":"1.3.2","environment":"production"}
+cloudadmin@cloud-vm:~$ cd /opt/cloud-app/current && set -a; . /etc/cloud-app/cloud-app.env; set +a && .venv/bin/alembic current
+0001 (head)
+
+cloudadmin@cloud-vm:~$ ls /opt/cloud-app/releases
+v1.3.2
+

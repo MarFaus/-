@@ -1,0 +1,25 @@
+cloudadmin@cloud-vm:~$ cloud-appctl stop; cloud-appctl status
+cloud-app.service - Cloud Application
+   Active: inactive (dead)
+
+cloudadmin@cloud-vm:~$ cd /opt/cloud-app/releases/v1.4.0 && set -a; . /etc/cloud-app/cloud-app.env; set +a && .venv/bin/alembic upgrade head; .venv/bin/alembic current
+0002 (head)
+
+cloudadmin@cloud-vm:~$ psql -h 127.0.0.1 -U cloud_app_user cloud_app -c '\d items' -c 'select * from items'
+                                     Table "public.items"
+  Column  |          Type          | Collation | Nullable |              Default              
+----------+------------------------+-----------+----------+-----------------------------------
+ id       | integer                |           | not null | nextval('items_id_seq'::regclass)
+ name     | character varying(100) |           | not null | 
+ priority | integer                |           | not null | 0
+Indexes:
+    "items_pkey" PRIMARY KEY, btree (id)
+
+ id |   name   | priority 
+----+----------+----------
+  1 | server   |        0
+  2 | database |        0
+  3 | network  |        0
+(3 rows)
+
+

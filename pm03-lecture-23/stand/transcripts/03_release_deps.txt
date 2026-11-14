@@ -1,0 +1,18 @@
+cloudadmin@cloud-vm:~$ cd /opt/cloud-app/releases && git clone -q --branch v1.4.0 --depth 1 /srv/cloud-app.git v1.4.0 && git -C v1.4.0 describe --tags
+warning: --depth is ignored in local clones; use file:// instead.
+v1.4.0
+
+cloudadmin@cloud-vm:~$ cd /opt/cloud-app/releases/v1.4.0 && ls -A
+.env.example
+.git
+README.md
+alembic.ini
+app
+migrations
+requirements.txt
+
+cloudadmin@cloud-vm:~$ cd /opt/cloud-app/releases/v1.4.0 && python3 -m venv .venv && .venv/bin/pip install -r requirements.txt 2>&1 | grep -E '^(Collecting fastapi|Collecting alembic|Successfully)' | cut -c1-110
+Collecting fastapi (from -r requirements.txt (line 1))
+Collecting alembic (from -r requirements.txt (line 5))
+Successfully installed Mako-1.4.3 MarkupSafe-3.0.4 alembic-1.20.1 annotated-doc-0.0.6 annotated-types-0.8.0 an
+

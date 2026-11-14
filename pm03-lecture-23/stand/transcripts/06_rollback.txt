@@ -1,0 +1,20 @@
+cloudadmin@cloud-vm:~$ cloud-appctl stop; cloud-appctl status
+cloud-app.service - Cloud Application
+   Active: inactive (dead)
+
+cloudadmin@cloud-vm:~$ cd /opt/cloud-app/releases/v1.4.0 && set -a; . /etc/cloud-app/cloud-app.env; set +a && .venv/bin/alembic current && .venv/bin/alembic downgrade 0001 && .venv/bin/alembic current
+0002 (head)
+0001
+
+cloudadmin@cloud-vm:~$ ln -sfn /opt/cloud-app/releases/v1.3.2 /opt/cloud-app/current && readlink /opt/cloud-app/current
+/opt/cloud-app/releases/v1.3.2
+
+cloudadmin@cloud-vm:~$ cloud-appctl start; cloud-appctl status
+cloud-app.service - Cloud Application
+   Active: active (running), PID 1256, user cloudapp
+   Release: /opt/cloud-app/releases/v1.3.2
+
+cloudadmin@cloud-vm:~$ curl -s http://127.0.0.1:8000/health; echo; curl -s http://127.0.0.1:8000/version; echo; curl -s http://127.0.0.1:8000/items
+{"status":"ok"}
+{"version":"1.3.2","environment":"production"}
+[{"id":1,"name":"server"},{"id":2,"name":"database"},{"id":3,"name":"network"}]

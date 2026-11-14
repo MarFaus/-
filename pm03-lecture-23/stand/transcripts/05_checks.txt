@@ -1,0 +1,18 @@
+cloudadmin@cloud-vm:~$ ln -sfn /opt/cloud-app/releases/v1.4.0 /opt/cloud-app/current && readlink /opt/cloud-app/current
+/opt/cloud-app/releases/v1.4.0
+
+cloudadmin@cloud-vm:~$ cloud-appctl start; cloud-appctl status
+cloud-app.service - Cloud Application
+   Active: active (running), PID 1210, user cloudapp
+   Release: /opt/cloud-app/releases/v1.4.0
+
+cloudadmin@cloud-vm:~$ curl -i -s http://127.0.0.1:8000/health | sed -n '1p;$p'
+HTTP/1.1 200 OK
+{"status":"ok"}
+cloudadmin@cloud-vm:~$ curl -s http://127.0.0.1:8000/version
+{"version":"1.4.0","environment":"production"}
+cloudadmin@cloud-vm:~$ curl -s http://127.0.0.1:8000/items
+[{"id":1,"name":"server","priority":0},{"id":2,"name":"database","priority":0},{"id":3,"name":"network","priority":0}]
+cloudadmin@cloud-vm:~$ curl -s -o /dev/null -w '/docs -> HTTP %{http_code}\n' http://127.0.0.1:8000/docs
+/docs -> HTTP 200
+
