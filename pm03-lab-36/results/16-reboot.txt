@@ -1,0 +1,46 @@
+$ systemctl is-enabled cloud-application.service
+systemctl is-active cloud-application.service
+uptime -s 2>/dev/null; who -b 2>/dev/null; journalctl --list-boots --no-pager
+enabled
+active
+2026-11-16 10:07:42
+         system boot  Nov 16 10:12
+IDX BOOT ID                          FIRST ENTRY                 LAST ENTRY
+  0 aabf740221c84205b7b46210f02c33df Mon 2026-11-16 10:12:35 UTC Mon 2026-11-16 10:16:10 UTC
+
+$ sudo reboot
+
+$ systemctl is-enabled \
+    cloud-application.service
+enabled
+
+$ systemctl is-active \
+    cloud-application.service
+active
+
+$ curl \
+    http://127.0.0.1:8000/status
+{"status":"ok","application":"CloudApplication","version":"0.7","environment":"production","debug":false,"api_prefix":"/api"}  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+100   125  100   125    0     0   7903      0 --:--:-- --:--:-- --:--:--  8333
+
+$ journalctl --list-boots --no-pager
+IDX BOOT ID                          FIRST ENTRY                 LAST ENTRY
+  0 aabf740221c84205b7b46210f02c33df Mon 2026-11-16 10:12:35 UTC Mon 2026-11-16 10:16:45 UTC
+
+$ systemctl show cloud-application.service -p ActiveEnterTimestamp -p MainPID
+ps -o user=,pid=,lstart= -p "$(systemctl show cloud-application.service -p MainPID --value)"
+MainPID=74
+ActiveEnterTimestamp=Mon 2026-11-16 10:16:21 UTC
+cloudapp      74 Mon Nov 16 10:16:21 2026
+
+$ sudo journalctl -u cloud-application.service -b 0 --no-pager -n 6
+Nov 16 10:16:17 cloud-server python[1017]: INFO:     Finished server process [1017]
+Nov 16 10:16:22 vm python[74]: INFO:     Started server process [74]
+Nov 16 10:16:22 vm python[74]: INFO:     Waiting for application startup.
+Nov 16 10:16:22 vm python[74]: INFO:     Application startup complete.
+Nov 16 10:16:22 vm python[74]: INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+Nov 16 10:16:45 vm python[74]: INFO:     127.0.0.1:46238 - "GET /status HTTP/1.1" 200 OK
+

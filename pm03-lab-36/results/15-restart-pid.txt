@@ -1,0 +1,24 @@
+$ PID_BEFORE=$(systemctl show \
+    cloud-application.service \
+    -p MainPID \
+    --value)
+
+$ sudo systemctl restart \
+    cloud-application.service
+
+$ PID_AFTER=$(systemctl show \
+    cloud-application.service \
+    -p MainPID \
+    --value)
+
+$ echo "before=$PID_BEFORE"
+  echo "after=$PID_AFTER"
+before=1005
+after=1017
+
+$ curl \
+    http://127.0.0.1:8000/status
+{"status":"ok","application":"CloudApplication","version":"0.7","environment":"production","debug":false,"api_prefix":"/api"}
+
+$ ps -o user=,pid=,etime= -p "$PID_AFTER"
+cloudapp    1017       00:02

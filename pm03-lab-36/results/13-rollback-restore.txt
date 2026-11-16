@@ -1,0 +1,53 @@
+$ sudo systemctl stop \
+    cloud-application.service
+
+$ systemctl is-active cloud-application.service
+inactive
+
+$ sudo cp \
+    /etc/cloud-application/cloud-application.env.bak \
+    /etc/cloud-application/cloud-application.env
+
+$ grep '^APP_PORT=' \
+    /etc/cloud-application/cloud-application.env
+APP_PORT=8000
+
+$ sudo systemctl start \
+    cloud-application.service
+
+$ sleep 2; systemctl is-active \
+    cloud-application.service
+active
+
+$ curl -i \
+    http://127.0.0.1:8000/status
+HTTP/1.1 200 OK
+date: Mon, 16 Nov 2026 10:15:48 GMT
+server: uvicorn
+content-length: 125
+content-type: application/json
+
+{"status":"ok","application":"CloudApplication","version":"0.7","environment":"production","debug":false,"api_prefix":"/api"}  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+100   125  100   125    0     0   9584      0 --:--:-- --:--:-- --:--:--  9615
+
+$ sudo rm \
+    /etc/cloud-application/cloud-application.env.bak
+
+$ ls -l /etc/cloud-application/
+total 8
+-rw-r----- 1 root cloudapp  360 Nov 16 10:15 cloud-application.env
+drwxr-x--- 2 root cloudapp 4096 Nov 16 10:14 secrets
+
+$ sudo journalctl -u cloud-application.service --no-pager -n 8
+Nov 16 10:15:44 cloud-server python[950]: app_port
+Nov 16 10:15:44 cloud-server python[950]:   Input should be a valid integer, unable to parse string as an integer [type=int_parsing, input_value='not-a-number', input_type=str]
+Nov 16 10:15:44 cloud-server python[950]:     For further information visit https://errors.pydantic.dev/2.14/v/int_parsing
+Nov 16 10:15:47 cloud-server python[967]: INFO:     Started server process [967]
+Nov 16 10:15:47 cloud-server python[967]: INFO:     Waiting for application startup.
+Nov 16 10:15:47 cloud-server python[967]: INFO:     Application startup complete.
+Nov 16 10:15:47 cloud-server python[967]: INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+Nov 16 10:15:48 cloud-server python[967]: INFO:     127.0.0.1:51224 - "GET /status HTTP/1.1" 200 OK
+

@@ -1,0 +1,13 @@
+$ sudo systemctl enable \
+    --now \
+    cloud-application.service
+Created symlink /etc/systemd/system/multi-user.target.wants/cloud-application.service → /etc/systemd/system/cloud-application.service.
+
+$ systemctl is-enabled \
+    cloud-application.service
+enabled
+
+$ systemctl is-active \
+    cloud-application.service
+active
+

@@ -1,0 +1,54 @@
+$ sudo ss \
+    -ltnp \
+    | grep ':8000'
+LISTEN 0      2048       127.0.0.1:8000       0.0.0.0:*    users:(("python",pid=897,fd=12))
+
+$ curl -i \
+    http://127.0.0.1:8000/status
+HTTP/1.1 200 OK
+date: Mon, 16 Nov 2026 10:15:31 GMT
+server: uvicorn
+content-length: 125
+content-type: application/json
+
+{"status":"ok","application":"CloudApplication","version":"0.7","environment":"production","debug":false,"api_prefix":"/api"}  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+100   125  100   125    0     0  10241      0 --:--:-- --:--:-- --:--:-- 10416
+
+$ curl -s \
+    -o /dev/null \
+    -w "%{http_code}\n" \
+    http://127.0.0.1:8000/docs
+200
+
+$ curl -s http://127.0.0.1:8000/docs | head -c 400; echo
+
+    <!DOCTYPE html>
+    <html>
+    <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link type="text/css" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui.css">
+    <link rel="shortcut icon" href="https://fastapi.tiangolo.com/img/favicon.png">
+    <title>CloudApplication - Swagger UI</title>
+    </head>
+    <body>
+    <div id="s
+
+$ curl -s -o /dev/null -w "/openapi.json -> %{http_code}\n" http://127.0.0.1:8000/openapi.json
+/openapi.json -> 200
+
+$ IP=$(hostname -I | cut -d" " -f1); echo "внешний адрес сервера: $IP"; curl -sS --max-time 3 http://$IP:8000/status; echo "exit code: $?"
+внешний адрес сервера: 192.0.2.2
+exit code: 7
+curl: (7) Failed to connect to 192.0.2.2 port 8000 after 0 ms: Couldn't connect to server
+
+$ sudo journalctl -u cloud-application.service --no-pager -n 6
+Nov 16 10:15:14 cloud-server python[897]: INFO:     Application startup complete.
+Nov 16 10:15:14 cloud-server python[897]: INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+Nov 16 10:15:31 cloud-server python[897]: INFO:     127.0.0.1:44664 - "GET /status HTTP/1.1" 200 OK
+Nov 16 10:15:31 cloud-server python[897]: INFO:     127.0.0.1:44680 - "GET /docs HTTP/1.1" 200 OK
+Nov 16 10:15:31 cloud-server python[897]: INFO:     127.0.0.1:44684 - "GET /docs HTTP/1.1" 200 OK
+Nov 16 10:15:32 cloud-server python[897]: INFO:     127.0.0.1:44700 - "GET /openapi.json HTTP/1.1" 200 OK
+

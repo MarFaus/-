@@ -1,0 +1,38 @@
+$ hostname
+cloud-server
+
+$ grep PRETTY_NAME /etc/os-release
+PRETTY_NAME="Ubuntu 24.04.5 LTS"
+
+$ /opt/cloud-application/venv/bin/python --version
+Python 3.13.18
+
+$ sudo -u cloudapp git -C /opt/cloud-application/app rev-parse --short HEAD
+a4d289f
+
+$ ps -o user= -p "$(systemctl show cloud-application.service -p MainPID --value)"
+cloudapp
+
+$ systemctl show cloud-application.service -p Id -p ActiveState -p SubState -p MainPID -p UnitFileState
+MainPID=967
+Id=cloud-application.service
+ActiveState=active
+SubState=running
+UnitFileState=enabled
+
+$ ss -ltn | grep ':8000' | awk '{print "bind address: " $4}'
+bind address: 127.0.0.1:8000
+
+$ curl -s -o /dev/null -w "/status -> %{http_code}\n" http://127.0.0.1:8000/status
+curl -s -o /dev/null -w "/docs   -> %{http_code}\n" http://127.0.0.1:8000/docs
+/status -> 200
+/docs   -> 200
+
+$ ls -d /etc/cloud-application/cloud-application.env /etc/cloud-application/secrets
+/etc/cloud-application/cloud-application.env
+/etc/cloud-application/secrets
+
+$ journalctl --disk-usage; journalctl -u cloud-application.service --no-pager | wc -l
+Archived and active journals take up 8.0M in the file system.
+33
+

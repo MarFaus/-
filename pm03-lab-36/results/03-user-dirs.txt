@@ -1,0 +1,28 @@
+$ sudo useradd \
+    --system \
+    --user-group \
+    --home-dir /opt/cloud-application \
+    --shell /usr/sbin/nologin \
+    cloudapp
+
+$ id cloudapp
+uid=996(cloudapp) gid=995(cloudapp) groups=995(cloudapp)
+
+$ sudo install \
+    -d \
+    -o cloudapp \
+    -g cloudapp \
+    -m 0755 \
+    /opt/cloud-application
+
+$ sudo install \
+    -d \
+    -o root \
+    -g cloudapp \
+    -m 0750 \
+    /etc/cloud-application
+
+$ ls -ld /opt/cloud-application /etc/cloud-application
+drwxr-x--- 2 root     cloudapp 4096 Nov 16 10:14 /etc/cloud-application
+drwxr-xr-x 2 cloudapp cloudapp 4096 Nov 16 10:14 /opt/cloud-application
+

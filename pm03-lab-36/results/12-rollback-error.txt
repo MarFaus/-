@@ -1,0 +1,71 @@
+$ sudo cp \
+    /etc/cloud-application/cloud-application.env \
+    /etc/cloud-application/cloud-application.env.bak
+
+$ ls -l \
+    /etc/cloud-application/cloud-application.env*
+-rw-r----- 1 root cloudapp 360 Nov 16 10:14 /etc/cloud-application/cloud-application.env
+-rw-r----- 1 root root     360 Nov 16 10:15 /etc/cloud-application/cloud-application.env.bak
+
+$ sudo sed -i \
+    's/^APP_PORT=8000$/APP_PORT=not-a-number/' \
+    /etc/cloud-application/cloud-application.env
+
+$ grep '^APP_PORT=' \
+    /etc/cloud-application/cloud-application.env
+APP_PORT=not-a-number
+
+$ sudo systemctl restart \
+    cloud-application.service
+
+$ sleep 2; systemctl status \
+    cloud-application.service \
+    --no-pager
+● cloud-application.service - Cloud Application FastAPI Service
+     Loaded: loaded (/etc/systemd/system/cloud-application.service; enabled; preset: enabled)
+     Active: activating (auto-restart) (Result: exit-code) since Mon 2026-11-16 10:15:44 UTC; 1s ago
+    Process: 950 ExecStart=/opt/cloud-application/venv/bin/python /opt/cloud-application/app/run.py (code=exited, status=1/FAILURE)
+   Main PID: 950 (code=exited, status=1/FAILURE)
+
+$ sudo journalctl \
+    -u cloud-application.service \
+    -n 50 \
+    --no-pager
+Nov 16 10:15:14 cloud-server python[897]: INFO:     Started server process [897]
+Nov 16 10:15:14 cloud-server python[897]: INFO:     Waiting for application startup.
+Nov 16 10:15:14 cloud-server python[897]: INFO:     Application startup complete.
+Nov 16 10:15:14 cloud-server python[897]: INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+Nov 16 10:15:31 cloud-server python[897]: INFO:     127.0.0.1:44664 - "GET /status HTTP/1.1" 200 OK
+Nov 16 10:15:31 cloud-server python[897]: INFO:     127.0.0.1:44680 - "GET /docs HTTP/1.1" 200 OK
+Nov 16 10:15:31 cloud-server python[897]: INFO:     127.0.0.1:44684 - "GET /docs HTTP/1.1" 200 OK
+Nov 16 10:15:32 cloud-server python[897]: INFO:     127.0.0.1:44700 - "GET /openapi.json HTTP/1.1" 200 OK
+Nov 16 10:15:44 cloud-server python[897]: INFO:     Shutting down
+Nov 16 10:15:44 cloud-server python[897]: INFO:     Waiting for application shutdown.
+Nov 16 10:15:44 cloud-server python[897]: INFO:     Application shutdown complete.
+Nov 16 10:15:44 cloud-server python[897]: INFO:     Finished server process [897]
+Nov 16 10:15:44 cloud-server python[950]: Traceback (most recent call last):
+Nov 16 10:15:44 cloud-server python[950]:   File "/opt/cloud-application/app/run.py", line 2, in <module>
+Nov 16 10:15:44 cloud-server python[950]:     from app.config import settings
+Nov 16 10:15:44 cloud-server python[950]:   File "/opt/cloud-application/app/app/config.py", line 27, in <module>
+Nov 16 10:15:44 cloud-server python[950]:     settings = Settings()
+Nov 16 10:15:44 cloud-server python[950]:   File "/opt/cloud-application/venv/lib/python3.13/site-packages/pydantic_settings/main.py", line 292, in __init__
+Nov 16 10:15:44 cloud-server python[950]:     super().__init__(**__pydantic_self__.__class__._settings_build_values(sources, init_kwargs))
+Nov 16 10:15:44 cloud-server python[950]:     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Nov 16 10:15:44 cloud-server python[950]:   File "/opt/cloud-application/venv/lib/python3.13/site-packages/pydantic/main.py", line 280, in __init__
+Nov 16 10:15:44 cloud-server python[950]:     validated_self = self.__pydantic_validator__.validate_python(data, self_instance=self)
+Nov 16 10:15:44 cloud-server python[950]: pydantic_core._pydantic_core.ValidationError: 1 validation error for Settings
+Nov 16 10:15:44 cloud-server python[950]: app_port
+Nov 16 10:15:44 cloud-server python[950]:   Input should be a valid integer, unable to parse string as an integer [type=int_parsing, input_value='not-a-number', input_type=str]
+Nov 16 10:15:44 cloud-server python[950]:     For further information visit https://errors.pydantic.dev/2.14/v/int_parsing
+
+$ systemctl show cloud-application.service -p ActiveState -p SubState -p Result -p ExecMainStatus -p NRestarts
+Result=exit-code
+NRestarts=0
+ExecMainStatus=1
+ActiveState=activating
+SubState=auto-restart
+
+$ curl -sS --max-time 3 http://127.0.0.1:8000/status; echo "exit code: $?"
+exit code: 7
+curl: (7) Failed to connect to 127.0.0.1 port 8000 after 0 ms: Couldn't connect to server
+

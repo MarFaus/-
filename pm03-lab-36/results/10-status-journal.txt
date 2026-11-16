@@ -1,0 +1,47 @@
+$ systemctl status \
+    cloud-application.service \
+    --no-pager
+● cloud-application.service - Cloud Application FastAPI Service
+     Loaded: loaded (/etc/systemd/system/cloud-application.service; enabled; preset: enabled)
+     Active: active (running) since Mon 2026-11-16 10:15:13 UTC; 17s ago
+   Main PID: 897 (python)
+      Tasks: 5 (limit: 19277)
+     Memory: 33.1M ()
+     CGroup: /system.slice/cloud-application.service
+             └─897 /opt/cloud-application/venv/bin/python /opt/cloud-application/app/run.py
+
+Nov 16 10:15:14 cloud-server python[897]: INFO:     Started server process [897]
+Nov 16 10:15:14 cloud-server python[897]: INFO:     Waiting for application startup.
+Nov 16 10:15:14 cloud-server python[897]: INFO:     Application startup complete.
+Nov 16 10:15:14 cloud-server python[897]: INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+
+$ systemctl show \
+    cloud-application.service \
+    -p ActiveState \
+    -p SubState \
+    -p MainPID \
+    -p ExecMainStatus \
+    -p Restart
+Restart=on-failure
+MainPID=897
+ExecMainStatus=0
+ActiveState=active
+SubState=running
+
+$ PID=$(systemctl show \
+    cloud-application.service \
+    -p MainPID \
+    --value)
+ps -fp "$PID"
+UID          PID    PPID  C STIME TTY          TIME CMD
+cloudapp     897       1  1 10:15 ?        00:00:00 /opt/cloud-application/venv/bin/python /opt/cloud-application/app/run.py
+
+$ sudo journalctl \
+    -u cloud-application.service \
+    -n 40 \
+    --no-pager
+Nov 16 10:15:14 cloud-server python[897]: INFO:     Started server process [897]
+Nov 16 10:15:14 cloud-server python[897]: INFO:     Waiting for application startup.
+Nov 16 10:15:14 cloud-server python[897]: INFO:     Application startup complete.
+Nov 16 10:15:14 cloud-server python[897]: INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+
